@@ -8,7 +8,7 @@ set -e
 #Configuration Variables
 
 repo_url="https://github.com/ajitsinghnegi/django-notes-app.git"
-app_dir="/var/www/django-notes-app"
+app_dir="/var/www/deploy-django-notes-app"
 
 #updating system and installing system tools and dependencies
 
@@ -54,9 +54,9 @@ clone(){
 
                         }
 
-          fi
-            }
-echo "APP CLONING FINISHED"
+               	 fi
+		 echo "APP CLONING FINISHED"
+	}
 
 #doing restart and enabling the tools
 
@@ -70,21 +70,29 @@ required_restart(){
 
                         systemctl restart docker
 
-echo "RESTARTING FINISHED"
+			echo "RESTARTING FINISHED"
+		}
 
 deploy(){
 
-                docker build -t notes-app .
+    cd "$app_dir"
+    sudo docker-compose down 2>/dev/null || true
+    sudo docker-compose up -d --build
+}
 
-                docker run -d -p 8000:8000 notes-app:latest
-
-        }
 
 echo "DEPLOYMENT STARTED"
-
 install_tools
+
 clone
+cd "$app_dir" || {
+	
+    echo "Error: Folder nahi mila!"
+    exit 1
+}
+
 required_restart
+
 deploy
 
 echo "DEPLOYMENT FINISHED"
